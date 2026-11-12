@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dürtme Sohbeti</title>
+<style>
+:root{--bg:#eef2f8;--fg:#141a26;--card:#fff;--mut:#6a7488;--acc:#2d7ff9;--bd:#d8deea;--mine:#d9ecff;--theirs:#ffffff;--sys:#fff3cd;--danger:#e8402a}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1118;--fg:#eef1f7;--card:#181d29;--mut:#9aa4b8;--bd:#2a3142;--mine:#1c3a63;--theirs:#202737;--sys:#3a3115}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#login{height:100%;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:24px;width:100%;max-width:360px}
+h1{margin:0 0 4px;font-size:26px}
+p.sub{margin:0 0 16px;color:var(--mut);font-size:14px}
+input[type=text]{width:100%;padding:12px;font-size:16px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--fg)}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;background:var(--acc);color:#fff;cursor:pointer}
+#go{width:100%;padding:12px;margin-top:14px}
+#err{color:var(--danger);font-size:13px;margin-top:10px;min-height:18px}
+#app{display:none;height:100%;flex-direction:column;max-width:760px;margin:0 auto;background:var(--bg)}
+header{padding:10px 14px;background:linear-gradient(135deg,#2d7ff9,#6a4bff);color:#fff}
+header b{font-size:17px}
+#users{font-size:12px;opacity:.9;margin-top:2px;white-space:nowrap;overflow-x:auto}
+#log{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:82%;padding:8px 12px;border-radius:14px;background:var(--theirs);border:1px solid var(--bd);align-self:flex-start;word-wrap:break-word;overflow-wrap:anywhere}
+.m.me{align-self:flex-end;background:var(--mine)}
+.m .h{font-size:12px;color:var(--mut);margin-bottom:2px}
+.m .h b{color:var(--fg)}
+.m img{max-width:100%;max-height:300px;border-radius:10px;display:block;cursor:zoom-in}
+.s{align-self:center;background:var(--sys);padding:6px 12px;border-radius:12px;font-size:13px;text-align:center}
+#comp{padding:8px 10px;border-top:1px solid var(--bd);background:var(--card)}
+.r{display:flex;gap:8px}
+#txt{flex:1}
+.ic{padding:0 14px;font-size:20px;background:var(--bg);color:var(--fg);border:1px solid var(--bd)}
+#snd{padding:0 16px}
+#nd{width:100%;margin-top:8px;padding:12px;font-size:16px;background:var(--danger)}
+#nd:disabled{opacity:.55;cursor:not-allowed}
+#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center}
+#lb img{max-width:96%;max-height:92%}
+/* kaos */
+@keyframes quake{0%{transform:translate(0,0) rotate(0)}10%{transform:translate(-22px,14px) rotate(-1.6deg)}20%{transform:translate(18px,-20px) rotate(1.4deg)}30%{transform:translate(-14px,-16px) rotate(-1deg)}40%{transform:translate(24px,12px) rotate(1.8deg)}50%{transform:translate(-26px,-10px) rotate(-1.5deg)}60%{transform:translate(12px,22px) rotate(1deg)}70%{transform:translate(-20px,8px) rotate(-1.8deg)}80%{transform:translate(16px,-18px) rotate(1.2deg)}90%{transform:translate(-10px,18px) rotate(-1deg)}100%{transform:translate(0,0) rotate(0)}}
+.quake #app,.quake #login{animation:quake .22s linear infinite}
+#rain{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:60}
+.em{position:absolute;top:-12vh;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(125vh) rotate(420deg)}}
+#al{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;pointer-events:none;text-align:center;background:var(--danger);color:#fff;font-weight:900;font-size:clamp(26px,8vw,64px);padding:18px 26px;border-radius:18px;width:min(92vw,900px);box-shadow:0 0 40px rgba(0,0,0,.6);animation:blink .35s steps(1) infinite}
+@keyframes blink{0%{opacity:1;background:#e8402a}50%{opacity:.85;background:#ffd400;color:#111}}
+</style>
+</head>
+<body>
+<div id="login"><div class="card">
+<h1>Dürtme Sohbeti 😂</h1>
+<p class="sub">Şifre yok. Bir isim yaz, odaya gir.</p>
+<input type="text" id="nm" maxlength="16" placeholder="Kullanıcı adın" autocomplete="off">
+<button id="go">Odaya gir</button>
+<div id="err"></div>
+</div></div>
+
+<div id="app">
+<header><b>Dürtme Sohbeti 😂</b><div id="users"></div></header>
+<div id="log"></div>
+<div id="comp">
+<div class="r">
+<input type="text" id="txt" maxlength="500" placeholder="Mesaj yaz... (/durt = kaos)" autocomplete="off">
+<button class="ic" id="ph" title="Fotoğraf">📷</button>
+<button id="snd">Gönder</button>
+</div>
+<button id="nd">🚨 Dürt / Kaos Yarat</button>
+<input type="file" id="fi" accept="image/*" style="display:none">
+</div>
+</div>
+<div id="rain"></div><div id="al"></div>
+<div id="lb"><img alt=""></div>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var ws=null,myName='',joined=false,ac=null,cdLeft=0,cdTimer=null,chaosTok=0,retry=0;
+try{$('nm').value=localStorage.getItem('dt_name')||''}catch(e){}
+
+function connect(){
+  var proto=location.protocol==='https:'?'wss://':'ws://';
+  ws=new WebSocket(proto+location.host);
+  ws.onopen=function(){retry=0;ws.send(JSON.stringify({t:'join',name:myName}))};
+  ws.onmessage=function(e){onMsg(JSON.parse(e.data))};
+  ws.onclose=function(){
+    if(joined){addSys('⚠️ Bağlantı koptu, yeniden bağlanılıyor…');setTimeout(connect,Math.min(5000,1000+retry++*1000))}
+    else $('err').textContent='Bağlanılamadı, tekrar dene. (Sunucu uyuyorsa 1 dakika sürebilir.)';
+  };
+}
+function join(){
+  myName=$('nm').value.trim();
+  if(!myName){$('err').textContent='Bir kullanıcı adı yaz.';return}
+  try{localStorage.setItem('dt_name',myName)}catch(e){}
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}
+  $('err').textContent='Bağlanıyor…';connect();
+}
+$('go').onclick=join;
+$('nm').addEventListener('keydown',function(e){if(e.key==='Enter')join()});
+
+function onMsg(m){
+  if(m.t==='err'){$('err').textContent=m.msg;joined=false;ws.close();return}
+  if(m.t==='welcome'){
+    joined=true;myName=m.name;$('login').style.display='none';$('app').style.display='flex';
+    $('log').innerHTML='';m.history.forEach(addMsg);
+    if(!window._ping)window._ping=setInterval(function(){if(ws&&ws.readyState===1)ws.send('{"t":"ping"}')},25000);
+    return;
+  }
+  if(m.t==='msg'||m.t==='sys')addMsg(m);
+  else if(m.t==='users')$('users').textContent='🟢 '+m.list.length+' çevrimiçi: '+m.list.join(', ');
+  else if(m.t==='nudge')chaos(m.name);
+  else if(m.t==='cool')startCool(Math.ceil(m.ms/1000));
+}
+function addSys(t){addMsg({t:'sys',text:t})}
+function addMsg(m){
+  var log=$('log'),near=log.scrollHeight-log.scrollTop-log.clientHeight<140;
+  var d=document.createElement('div');
+  if(m.t==='sys'){d.className='s';d.textContent=m.text}
+  else{
+    d.className='m'+(m.name===myName?' me':'');
+    var h=document.createElement('div');h.className='h';
+    var b=document.createElement('b');b.textContent=m.name;
+    var tm=new Date(m.ts).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+    h.appendChild(b);h.appendChild(document.createTextNode('  '+tm));d.appendChild(h);
+    if(m.img){var im=document.createElement('img');im.src=m.img;im.onclick=function(){$('lb').firstChild.src=m.img;$('lb').style.display='flex'};im.onload=function(){if(near)log.scrollTop=log.scrollHeight};d.appendChild(im)}
+    else{var t=document.createElement('div');t.textContent=m.text;d.appendChild(t)}
+  }
+  log.appendChild(d);
+  if(near||m.name===myName)log.scrollTop=log.scrollHeight;
+}
+$('lb').onclick=function(){this.style.display='none'};
+
+function sendText(){
+  var v=$('txt').value.trim();if(!v)return;
+  $('txt').value='';
+  if(v.toLowerCase()==='/durt'){nudge();return}
+  if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'msg',text:v}));
+}
+$('snd').onclick=sendText;
+$('txt').addEventListener('keydown',function(e){if(e.key==='Enter')sendText()});
+
+// foto
+$('ph').onclick=function(){$('fi').click()};
+$('fi').onchange=function(){
+  var f=this.files[0];this.value='';if(!f)return;
+  shrink(f).then(function(d){if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'img',data:d}))}).catch(function(){addSys('⚠️ Fotoğraf okunamadı.')});
+};
+function shrink(file){return new Promise(function(res,rej){
+  var url=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){
+    var w=im.width,h=im.height,m=900;
+    if(Math.max(w,h)>m){var k=m/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k)}
+    var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);
+    var q=.8,d=c.toDataURL('image/jpeg',q);
+    while(d.length>1200000&&q>.3){q-=.1;d=c.toDataURL('image/jpeg',q)}
+    URL.revokeObjectURL(url);res(d)};
+  im.onerror=function(){rej()};im.src=url})}
+
+// dürtme
+function nudge(){
+  if(cdLeft>0||!ws||ws.readyState!==1)return;
+  ws.send('{"t":"nudge"}');startCool(15);
+}
+$('nd').onclick=nudge;
+function startCool(s){
+  cdLeft=s;clearInterval(cdTimer);upd();
+  cdTimer=setInterval(function(){cdLeft--;if(cdLeft<=0){clearInterval(cdTimer);cdLeft=0}upd()},1000);
+}
+function upd(){var b=$('nd');b.disabled=cdLeft>0;b.textContent=cdLeft>0?'⏳ Bekle: '+cdLeft+' sn':'🚨 Dürt / Kaos Yarat'}
+
+function sound(){
+  if(!ac)return;try{ac.resume()}catch(e){}
+  var t0=ac.currentTime,master=ac.createGain();master.gain.value=.55;master.connect(ac.destination);
+  var o=ac.createOscillator();o.type='square';var g=ac.createGain();g.gain.value=.22;
+  for(var i=0;i<10;i++){o.frequency.setValueAtTime(600,t0+i*.5);o.frequency.linearRampToValueAtTime(1000,t0+i*.5+.25);o.frequency.linearRampToValueAtTime(600,t0+i*.5+.5)}
+  o.connect(g);g.connect(master);o.start(t0);o.stop(t0+5);
+  for(var j=0;j<14;j++){
+    var s=t0+j*.35,h=ac.createOscillator(),hg=ac.createGain();
+    h.type='sawtooth';h.frequency.setValueAtTime(380-j*8,s);h.frequency.exponentialRampToValueAtTime(220,s+.2);
+    hg.gain.setValueAtTime(.0001,s);hg.gain.linearRampToValueAtTime(.5,s+.03);hg.gain.exponentialRampToValueAtTime(.001,s+.26);
+    h.connect(hg);hg.connect(master);h.start(s);h.stop(s+.3);
+  }
+}
+function chaos(name){
+  var tok=++chaosTok,E=['😂','🤣','🤡'],rain=$('rain'),al=$('al');
+  document.body.classList.add('quake');
+  al.textContent=name.toLocaleUpperCase('tr-TR')+' HERKESİ DÜRTTÜ!';al.style.display='block';
+  sound();
+  var iv=setInterval(function(){
+    var s=document.createElement('span');s.className='em';s.textContent=E[Math.floor(Math.random()*3)];
+    s.style.left=Math.random()*96+'vw';s.style.fontSize=(24+Math.random()*40)+'px';
+    s.style.animationDuration=(1.4+Math.random()*1.8)+'s';
+    s.addEventListener('animationend',function(){s.remove()});rain.appendChild(s);
+  },60);
+  setTimeout(function(){
+    clearInterval(iv);
+    if(tok===chaosTok){document.body.classList.remove('quake');al.style.display='none'}
+  },5000);
+}
+})();
+</script>
+</body>
+</html>
